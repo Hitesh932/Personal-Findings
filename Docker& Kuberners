@@ -1,0 +1,251 @@
+Go to the application folder in local system > tomacat 9 folder > bin > type cmd >startup > localhost:8090
+
+a. docker -v --To check the docker version
+b. docker pull <inmage-name> - it is used to pull the docker image from docker repository to the local machine
+c. docker images    -it shows images present in your local machine
+d. docker search <image-name> -Searches docker images in docker default registry usually docker Hub based on docker Image Name
+e. docker ps     - shows the currently running containers which contains the image name,container id,command ,ports etc
+f. docker ps -a  - shows the all containers, including those that have stopped
+g. -d or --detach - This option tells Docker to run the container in the background, allowing you to continue using your terminal for other tasks
+h. -it interactive - used when you want to troubleshoot or explore the internals of a container, debug applications running in containers, or perform other interactive tasks within a containerized environment. -i Interactive(I/o operation with the container) t -terminal 
+i. docker run --name pythonContainer -d <image-name or id>   - run a docker container in detach mode for given image name/Id and name it as pythonContainer. Yo can name the container in any appropriate name using --name 
+j. docker exec -it <container id>  - is used to execute a command inside a running Docker container .it will be associtated with a command   
+
+Accessing a Shell: You can use it to access a shell (e.g., /bin/bash, /bin/sh) inside the container for debugging or exploring the container's environment.
+
+Running Commands: You can execute specific commands or scripts inside a running container. For example, you could run docker exec -it my-container npm install to install Node.js dependencies within a Node.js container named my-container.
+
+Inspecting Running Services: It's useful for checking the status or logs of services running inside containers.
+
+Managing Containers: You can use it to perform various management tasks within a container, such as creating files, modifying configurations, or stopping services.
+
+k. docker run --name javaCOntainer -it -d openjdk
+
+The docker run command you provided is used to start a Docker container named "javaContainer" with the OpenJDK image in interactive (-it) and detached (-d) mode. However, there's one issue with the command: it's missing the specific tag or version of the OpenJDK image.
+
+Here's the corrected command with a specific tag (e.g., 11-jre-slim) for the OpenJDK 
+if the open jdk is not availabe in the local system then it will be automatically downloaded from defauly repository
+
+l. docker exec -it javaCOntainer jshell
+
+The `docker exec` command you provided is attempting to start an interactive JShell session inside a Docker container named "javaContainer." This assumes that the "javaContainer" container is running and has a Java environment with the JShell tool available.
+
+Here's a breakdown of the command:
+
+- `docker exec`: This command is used to execute a command inside a running Docker container.
+
+- `-it`: These options enable an interactive terminal session, allowing you to interact with the command you execute inside the container.
+
+- `javaContainer`: This is the name of the container in which you want to execute the command.
+
+- `jshell`: This is the command you want to run inside the container. In this case, it's the JShell tool, which provides an interactive Java REPL (Read-Eval-Print Loop) environment.
+
+Assuming the "javaContainer" container is running and has Java and JShell properly installed, running the provided command will start an interactive JShell session inside the container. You'll be able to execute Java code and interact with the JShell prompt.
+
+If you encounter any issues or if the container is not running or does not have the necessary Java environment, you may need to adjust the container configuration or ensure that it is properly set up for your requirements.
+
+m. jshell> System.out.println("asdf")
+
+After the interactive seession in conatiner jshell can able to print the statement.Before that ensure the JShell and Java are installed in the container.
+
+n. /exit
+ used for exiting a running interactive shell or command session
+
+o. docker inspect <container>
+
+used to retrieve detailed information about a Docker container, image, network, or volume. When you run docker inspect followed by the name or ID of a container, you'll get a JSON-formatted output containing a wide range of information about the specified container. This information can be useful for debugging, troubleshooting, or automation.
+
+
+p. docker stop <container name/id> - used to stop a running Docker container by given id or container name
+q. docker rm containerId :this will remove and even not visible in "docker ps -a" 
+ command is used to remove one or more Docker containers from your system.
+ for running container use - docker rm -f containerId (-f: force)
+
+r. docker rmi imageId :you cannot remove an image if any existing containers are using it. You will need to stop and remove all containers that depend on the image first. If you encounter this issue, Docker will provide an error message indicating which containers are preventing the image's removal.
+If you want to forcefully remove an image, regardless of whether it is in use by containers, you can use the -f (or --force) option: to remove image
+
+s. docker login
+ used to log in to a Docker container registry or image repository. To use this command, you need to provide your Docker Hub credentials
+ When you run this command, Docker will prompt you to enter your Docker Hub username and password. After successfully logging in, Docker stores your credentials securely on your system, so you don't have to re-enter them every time you push or pull images to/from Docker Hub.
+ 
+ If you want enter a perticular image or Container you can enter the repository name.
+ 
+t. docker commit
+command is used to create a new Docker image from the changes made to an existing container. This command allows you to save the current state of a container, including any modifications you've made to the file system or configuration, as a new image.
+
+docker commit my-container my-custom-image:1.0
+
+my-container is the name or ID of the container you want to commit.
+
+my-custom-image:1.0 is the name and tag you want to assign to the new image. You can replace this with your desired repository and tag.
+
+After running the docker commit command, Docker will create a new image based on the current state of the container, including any changes you've made within that container. You can then use this new image to create and run containers with the same configuration and changes.
+
+Keep in mind that while docker commit can be useful for creating custom images during development and debugging, it's not the preferred method for managing images in production environments. In production, it's recommended to use Dockerfiles and a version control system to define and version your images and their configurations.
+
+
+u. docker push
+
+ used to upload Docker images from your local system to a container registry, making the images available for others to download and use. A container registry is a centralized repository for storing and sharing Docker images. Common container registries include Docker Hub, Google Container Registry, Amazon Elastic Container Registry (ECR), and many others.
+ 
+ # Log in to Docker Hub (you'll be prompted for your credentials)
+docker login
+
+# Tag the local image with your Docker Hub username and desired repository name
+docker tag my-image:1.0 your-docker-hub-username/my-image:1.0
+
+# Push the tagged image to Docker Hub
+docker push your-docker-hub-username/my-image:1.0
+
+
+v. docker copy
+
+The docker cp command allows you to copy files or directories between your local file system and a running Docker container. This command is useful for transferring data in and out of containers, such as configuration files, scripts, or data files.
+docker cp [OPTIONS] <source_path> <container_id_or_name>:<destination_path>
+docker cp [OPTIONS] <container_id_or_name>:<source_path> <destination_path>
+
+Remember to replace /path/to/local and /path/in/container with the actual paths you want to use. The docker cp command works in both directions, allowing you to copy files and directories to and from containers as needed.
+
+w. docker volume
+Docker volumes are a fundamental tool for managing data in Dockerized applications, offering data persistence, flexibility, and scalability. They are commonly used in a wide range of scenarios, including database storage, log management, and file sharing between containers.
+
+Docker volumes are a feature used to persist data generated by and used by Docker containers. Volumes provide a way to store and share data between containers and the host system, as well as between different containers. They are an essential part of managing data in Dockerized applications.
+
+docker volume create my- volume Creates volume
+
+docker volume ls - lists all Docker volumes on your system.
+
+docker volume inspect my-volume - provides detailed information about a specific volume, including its location on the host system.
+
+docker run -v my-volume:/path/in/container my-image - mounts the "my-volume" volume to a specific path inside the container.
+
+docker volume rm my-volume - docker volume rm my-volume 
+
+
+x. docker logout
+
+
+The docker logout command is used to log out of a Docker registry or container image repository. When you use docker login to log in to a registry, Docker stores your credentials securely on your system. The docker logout command allows you to remove those stored credentials, effectively logging you out from the registry.
+
+
+This command will remove the stored credentials for the specified registry, preventing you from pushing or pulling images from that registry until you log in again.
+
+Logging out is useful when you want to switch between Docker Hub and other private registries or when you want to ensure that you are not inadvertently using stored credentials to access a specific registry.
+
+
+Docker File 
+-----------------------------
+
+FROM tomcat:9.0.76-jdk21-openjdk 
+
+The FROM instruction in a Dockerfile is used to specify the base image upon which your custom Docker image will be built. In your case, you are using the FROM instruction to start with the official Tomcat 9 image with OpenJDK 11 as the base image. The tomcat:9.0.76-jdk21-openjdk tag specifies the specific version of Tomcat and OpenJDK you want to use.
+
+This Dockerfile will serve as the starting point for building your custom Docker image for deploying a web application on Tomcat. You can continue to add further instructions to configure and customize your image as needed for your specific web application.
+
+
+COPY ROOT.war /usr/local/tomcat/webapps
+
+In your Dockerfile, you can use the COPY instruction to copy your WAR (Web Application Archive) file into the Tomcat webapps directory
+
+In this example, we assume that the ROOT.war file is in the same directory as your Dockerfile. The COPY instruction copies the WAR file from the local directory into the /usr/local/tomcat/webapps/ directory within the Docker image.
+
+This setup is commonly used for deploying web applications in a Tomcat container. After building the Docker image with this Dockerfile, when you run a container from the image, Tomcat will automatically deploy the ROOT.war web application, making it accessible via the Tomcat server.
+
+The docker pull command is used to download a Docker image from a container registry. In your example, you are pulling the official Tomcat 9 image with the specific tag 9.0.76-jdk21-openjdk, which indicates the version of Tomcat and the Java JDK used in the image.
+
+
+Build 
+docker build -t smart-recon .
+---------------
+The docker build command is used to build a Docker image from a Dockerfile. In your example, you are building an image with the tag "smart-recon" from the Dockerfile in the current directory (indicated by the dot .).
+
+Here's the breakdown of your command:
+
+docker build: This is the command to build a Docker image.
+
+-t smart-recon: The -t option is used to specify a name and optionally a tag for the image. In this case, you're naming the image "smart-recon." You can replace "smart-recon" with any name you prefer.
+
+.: The dot . at the end of the command specifies the build context, which is the directory where Docker will look for the Dockerfile and any files that are being copied into the image. In this case, it's the current directory.
+
+
+
+The docker save command is used to save one or more Docker images to a tarball archive file. In your example, you are saving an image with the name and tag "smart-recon:latest" to a tarball file named "smart-recon.tar" located at "C:\tarLocation" on your Windows system.
+
+Here's the breakdown of your command:
+
+docker save: This is the command to save Docker images to a tarball archive.
+
+smart-recon:latest: This specifies the name and tag of the image you want to save. In this case, it's "smart-recon" with the tag "latest."
+
+>: The greater-than sign > is used to redirect the output of the docker save command to a file.
+
+C:\tarLocation\smart-recon.tar: This is the full path and filename where the tarball archive will be saved. It will be saved as "smart-recon.tar" in the "C:\tarLocation" directory on your Windows system.
+
+When you run this command, Docker will create a tarball archive file containing the image's layers and metadata, and it will be saved to the specified location.
+
+
+
+Important Notes
+--------------------
+docker push:
+------------
+docker push will be done in docker hub.So the steps for pushing a docker image to docker hub will be -
+step:1 
+Create a docker hub account and log in to the docker hub application .(id/email-khitesh932,pass-Khitesh123)
+step 2: 
+In the docker hub create a repository and name it as per your preferences.
+Step 3: 
+docker login 
+with docker hub id and password.
+Step 4:
+docker tag smart-recon:latest(image Name) khitesh932/smart-recon:latest(dockerhubUserName/imageName)
+Step 5:
+check the docker images present with the new tag given
+Step 6:
+docker push khitesh932/smart-recon:latest(dockerhubUserName/imageName)
+
+
+Kubernetes
+-------------------------------------
+1.Login to azure account and create a AKS(Azure Kubernetes Service).
+2.Inside the AKS configuration create a User nodepools with minimun no of nodes required and choose a free or bare minimum costing amount for choosing a virtual machine size(VM Size).
+3.Also in the same config create a Resource group , if not availabe choose the new Resource group.
+4.Choose the clusture preset as Dev/Test.
+5.In azure CLI , these are the Steps to Deploy a Docker Image to AKS:
+
+Create an AKS Cluster (if you don't have one):
+
+1.Configure kubectl to Use AKS Cluster:
+
+After creating the AKS cluster, configure kubectl to use the cluster's context by running the following command:
+az aks get-credentials --resource-group <resource-group-name> --name <aks-cluster-name>
+
+2.Deploy Your Web App Docker Image:
+
+Create a Kubernetes deployment using your Docker image. Replace <deployment-name>, <image-name>, and <container-port> with your desired values:
+
+kubectl create deployment <deployment-name> --image=<image-name> --port=<container-port>
+
+3.Expose Your Deployment with a Service:
+
+To make your web app accessible, you need to create a Kubernetes service. The following command creates a LoadBalancer service:
+
+kubectl expose deployment <deployment-name> --type=LoadBalancer --port=80 --target-port=<container-port>
+
+4.Monitor the Deployment:
+
+Monitor the deployment process using kubectl to ensure it's running successfully:
+
+kubectl get deployments
+kubectl get pods
+kubectl get services
+
+5.Once the external IP address is assigned to the service (LoadBalancer), you can access your web app via a web browser using that IP address.
+
+
+Notes:
+----------
+1.resource-group-name =aksdemo
+2.deployment-name = as per the user
+3.container-port = given 8080
+4.image-name=dockerhub.io/khitesh932/smart-recon:latest
