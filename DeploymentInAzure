@@ -1,0 +1,37 @@
+Deployment over Web app services
+------------------------------------
+1.open the local directory path for the War file and open the comand prompt over it.
+2.Use the az webapp deployment source config-zip command to deploy the .war file to your Azure App Service. Replace <app-name> with the name of your Azure App Service and <local-war-file> with the path to your local .war file.
+
+az webapp deployment source config-zip --resource-group <resource-group-name> --name <app-name> --src <local-war-file>
+
+az webapp deployment source config-zip --resource-group SmartRecon-Deployment-V1 --name SmartDemoDeployV1 --src D:\Projects\Deployment\ROOT_Octa.war
+az webapp deployment source config-zip --resource-group smartrecon_poc --name SmartReconPOC --src ROOT.war
+
+Replace the following placeholders:
+
+<resource-group-name>: The name of your Azure resource group where the Azure App Service is located.
+<app-name>: The name of your Azure App Service.
+<local-war-file>: The path to the .war file on your local machine.
+
+Deployment over Web app services using External Git Repo
+---------------------------------------------------------
+1.Upload your war file into the external Git repo. and the repo visibility may be Public/Private.
+2.In azure login create a webapp service with bare minimum config and Free costing services provided as per the region.
+3.In azure CLI use command to configure deployment from your external Git repository to your Azure App Service:
+ az webapp deployment source config --name <app-name> --resource-group <resource-group-name> --repo-url <git-repo-url> --branch <git-branch-name> --manual-integration
+Replace the following placeholders:
+
+<app-name>: The name of your Azure App Service.
+<resource-group-name>: The name of your Azure resource group.
+<git-repo-url>: The URL of your external Git repository.
+<git-branch-name>: The Git branch you want to deploy from.
+The --manual-integration flag is used to enable manual integration mode, which allows you to trigger deployments manually.
+
+4.Trigger a deployment from your Git repository to Azure App Service using the following Azure CLI command:
+az webapp deployment source sync --name <app-name> --resource-group <resource-group-name>
+
+
+catalina.base: /usr/local/tomcat
+java.version: 11.0.16.1
+java.home: /opt/java/openjdk	 
