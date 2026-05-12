@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Set the archive directory and max size (in bytes)
+ARCHIVE_DIR="/path/to/archive"
+MAX_SIZE=2073741824  # 2 GB in bytes
+
+
+current_size=$(du -sb "$ARCHIVE_DIR" | awk '{print $1}')
+
+if [ "$current_size" -gt "$MAX_SIZE" ]; then
+    # Find and delete the oldest WAL files
+    find "$ARCHIVE_DIR" -type f -printf '%T+ %p\n' | sort | head -n -10 | cut -d ' ' -f 2- | xargs rm -f
+fi
+
+
+
+
+#!/bin/bash
+
+# Call the cleanup script
+/path/to/cleanup_wal_archive.sh
+
+# Now perform the archiving of the WAL file
+# This is where you might add your actual archiving command
+cp "$1" "/path/to/archive/$2"
+
+
+
+archive_command = '/path/to/combined_script.sh %p %f'
+
+chmod +x /path/to/combined_script.sh

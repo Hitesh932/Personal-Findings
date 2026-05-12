@@ -1,0 +1,49 @@
+1.GENERATE YOUR ROOT CA 
+---------------------------
+openssl genrsa -out root.key 2048
+openssl req -x509 -new -nodes -key root.key -sha256 -days 7300 -out root.crt
+openssl req -out server.csr -new -newkey rsa:2048 -nodes -keyout server.key -subj "/CN=172.17.195.190"
+openssl x509 -req -in server.csr -CA root.crt -CAkey root.key -CAcreateserial -out server.crt -days 3650 -sha256
+
+
+2.INSTALL ON CLIENT
+-------------------
+WINDOWS
+--------
+Copy the root.crt to your computer
+Right Click on the file -> install Certificate
+Local Machine
+Choose: Place all certificates in the following store -> Browse
+Select: Trusted Root Certification Authorities -> OK
+Next -> Finish
+This will place your root CA cert into the trusted authorities for the OS.
+
+LINUX
+-------
+Copy the Certificate: Place the root.crt in a suitable directory, such as /etc/ssl/certs/:
+sudo cp /path/to/root.crt /etc/ssl/certs/
+
+Set Permissions: Ensure proper permissions for the certificate file:
+sudo chmod 644 /etc/ssl/certs/root.crt
+
+3.INSTALL ON DATABASE SERVER
+-----------------------------
+You should have 3 files now that would need to be put on the database server.
+root.crt
+server.crt
+server.key
+
+I usually just copy these to the PostgreSql Data folder for your  setup (for me that is D:\Data\PgSql\16) , the file we need to change is postgresql.conf file and we then enabled SSL connections with the following.
+
+ssl = on
+ssl_ca_file = 'root.crt'
+ssl_cert_file = 'server.crt'
+ssl_key_file = 'server.key'
+Save the file and restart your PostgreSQL service
+
+4.FORCE POSTGRESQL SSL CONNECTION
+----------------------------------
+You have now enabled SSL on your PostgreSQL server, but you can now force the clients to use it.  This will vary based on your own infrastructure.  Editing the pg_hba.conf in the PostgreSql Data folder will do the trick.  Below is an example of my setup, 192.168.1.54 would be an example of a client IP address, with hostssl force only SSL connections.  While the hostnossl rejects everything that does not have SSL enabled.
+
+hostnossl		all		all		0.0.0.0/0		reject
+hostssl			all 	all 	192.168.1.54/32 scram-sha-256

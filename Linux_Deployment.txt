@@ -1,0 +1,143 @@
+Step:1 
+-----------
+Download Open JDK 11
+--> sudo yum install java-11-openjdk-devel
+
+Check ,java is installed or not 
+
+--> java - version
+
+Step:2
+-----------
+Download tomacat 9 
+
+--> wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.90/bin/apache-tomcat-9.0.90.zip
+or 
+--> curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.90/bin/apache-tomcat-9.0.90.zip
+
+unzip the tomcat zip file
+
+--> unzip apache-tomcat-9.0.90.zip
+
+Step:3
+---------
+
+Download postgres Sql 
+
+Install the repository RPM:
+--> sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+Disable the built-in PostgreSQL module:
+--> sudo dnf -qy module disable postgresql
+
+Install PostgreSQL:
+--> sudo dnf install -y postgresql15-server
+
+Optionally initialize the database and enable automatic start:
+--> sudo /usr/pgsql-15/bin/postgresql-15-setup initdb
+--> sudo systemctl enable postgresql-15
+--> sudo systemctl start postgresql-15
+
+Step:4 
+---------
+Access PostgreSQL Prompt: Use the following command to access the PostgreSQL prompt as the default PostgreSQL superuser (postgres):
+
+--> sudo -i -u postgres
+
+Then set the postgres user password 
+
+--> \password postgres
+
+it will ask for password and enter the password and note it down.
+
+Step:5
+---------
+Create a Database
+Inside the PostgreSQL prompt (psql), you can create a new database using SQL commands. Here’s an example of creating a database named mydatabase:
+
+--> CREATE DATABASE mydatabase;
+
+Replace mydatabase with your desired database name. Make sure to end SQL statements with a semicolon (;).
+
+Step:6
+---------
+Create a User and Grant Permissions
+Next, you can create a new PostgreSQL user and grant it permissions on the database. Here’s an example of creating a user named myuser with a password and granting it all privileges on the mydatabase:
+
+--> CREATE USER myuser WITH PASSWORD 'password';
+
+--> GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser;
+
+Replace myuser with your desired username and 'password' with your desired password. Remember to enclose the password in single quotes ('').
+
+Step:7
+-------
+Exit PostgreSQL Prompt
+Once you have created the database and user, you can exit the PostgreSQL prompt by typing:
+
+--> \q
+
+This command will return you to the regular Linux shell prompt.
+
+Step:8
+--------
+Download and Place the file in linux machine.
+
+SQL file
+https://deloittesrt.s3.ap-south-1.amazonaws.com/BOB/27052024/setupQueries.sql
+
+
+Step:9
+---------
+Execute the SQL queries from downloaded SQL file.
+
+--> Move to the SQl file location in linux .
+
+Login to DB 
+
+--> psql -U username -d Databasename
+
+If this command will throw any Peer Connection error you can modify the pg_hba.conf file of postgres and set the connection type as md5 or Trust.
+After editing the .conf file , please restart the postgres application.
+
+Execute the SQl file.
+
+--> \i setupQueries.sql
+
+Step:10
+---------
+Download the war file in your local machine and Change the properties as required.
+
+https://deloittesrt.s3.ap-south-1.amazonaws.com/25062024/SmartRecon_IPRU_t9_10062024.war 
+
+Inside the war file move to web-inf --> lib --> Smartrecontech-all.jar --> dbprop.properties
+
+Edit the db URL ,Username and Password.
+
+
+Step:11
+--------
+Copy the Edited war file from local machine to the desired EC2-Instance via using WinSCP to a defined folder.
+
+Copy the same war file inside the apache-tomcat folder .
+Follow the path :  apache-tomcat --> webapps 
+
+Rename the War file to ROOT.war and if there will be already a ROOT folder is present, please remove the same.
+
+Step:12
+---------
+Move to bin folder inside the Apache Tomcat and start the tomcat Server.
+
+--> ./Startup.sh
+
+Now you can look forward into console log or Catlina.Out for application status.
+
+For Shutdown we can use 
+
+--> ./Shutdown.sh
+
+For any permissions issue login as a Root user or give the execute permission for the required files.
+
+ 
+
+

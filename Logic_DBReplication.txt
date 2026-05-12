@@ -1,0 +1,157 @@
+LOGICAL REPLICATION
+******************************************************************************************
+1. CONFIGURE THE PRIMARY DATABASE (RDS):
+-----------------------------------------
+
+Edit postgresql.conf:
+
+Modify the configuration to enable logical replication:
+
+wal_level = logical --Replica(Def)
+max_replication_slots = 5 --10(def)
+max_wal_senders = 5 --5(Def)
+
+2.CREATE A PUBLICATION: (RDS)
+------------------------
+Connect to your RDS PostgreSQL instance and create a publication:
+
+CREATE PUBLICATION my_publication FOR ALL TABLES;
+or 
+CREATE PUBLICATION my_publication FOR TABLE feed_config_tbl, user_tbl;
+
+GRANT USAGE ON SCHEMA public TO replication_user;
+or 
+GRANT SELECT ON TABLE my_table TO replication_user;
+
+3.GRANT REPLICATION PRIVILEGES: 
+-------------------------------
+
+Ensure the replication user has the necessary privileges to create publications:
+
+GRANT REPLICATION ON DATABASE dbname TO replication_user;
+
+4.CONFIGURE THE STANDBY DATABASE (LOCAL):
+-------------------------------------------
+Create a Subscription:
+Connect to your local PostgreSQL instance and create a subscription to the publication:
+
+CREATE SUBSCRIPTION my_subscription
+CONNECTION 'host=pocdbserver.postgres.database.azure.com port=5432 dbname=auth_db user=replication_user password=Cbsalb@2310'
+PUBLICATION my_publication;
+
+5.MONITOR REPLICATION:
+------------------------
+On the primary server, check publication status:
+
+SELECT * FROM pg_publication;
+On the standby server, check subscription status:
+
+SELECT * FROM pg_stat_subscription;
+
+
+==============================================================================
+CREATE PUBLICATION my_publication FOR TABLE role_tbl, user_tbl;
+SELECT rolname FROM pg_roles
+CREATE ROLE replication_user;
+ALTER ROLE replication_user WITH REPLICATION;
+GRANT REPLICATION ON DATABASE auth_db TO replication_user;
+CREATE ROLE replication_user WITH REPLICATION LOGIN PASSWORD 'Cbsalb@2310';
+ALTER ROLE replication_user WITH REPLICATION;
+SELECT * FROM pg_publication;
+GRANT USAGE ON SCHEMA public TO replication_user;
+GRANT SELECT ON TABLE user_tbl TO replication_user;
+===============================================================================
+REPLICA REPLICATION
+******************************************************************************************
+1. CONFIGURE THE PRIMARY DATABASE :
+-----------------------------------------
+
+a)Edit postgresql.conf to enable Replica replication:
+  wal_level = replica
+  max_wal_senders = 5
+  max_replication_slots = 5
+  archive_mode = on (Optional)
+  archive_command = 'cp %p /var/lib/pgsql/archive/%f'(Optional)
+
+b)Then Restart the postgresql service
+
+2. CONFIGURE THE STANDBY DATABASE :
+-----------------------------------------
+a)Stop the postgresql service.
+
+b)Take the Pg backup
+ pg_basebackup -h [primary IP] -D /var/lib/postgresql/15/data -U repuser -v -P --wal-method=stream -R 
+
+c)Rename the Data folder to data_old.
+
+d)Give permission to data folder.
+  sudo chown -R postgres:postgres /var/lib/postgresql/15/data
+  
+e)In postgresql.conf change
+  hot_standby = on
+  primary_conninfo = 'host=[primary-external-IP] port=5432 user=repuser password=[password]'
+  data_sync_retry = on
+  
+f)Create a file as standby.signal inside data folder
+  sudo touch standby.signal
+  sudo chown postgres:postgres /data/standby.signal
+  sudo chmod 755 /data/standby.signal
+
+  
+g)start the postgresql service and monitor the replication.
+
+
+Issues Might be facing :
+----------------------------------
+1. DB not starting due to Checkpoint Issues : Restart the Checkpoint
+	mv pg_logical/replorigin_checkpoint /tmp
+
+2. Log error during DB start :
+
+025-03-15 16:12:27.168 IST [3582537] LOG: redirecting log output to logging collector process
+2025-03-15 16:12:27.168 IST [3582537] HINT: Future log output will appear in directory "log".
+2025-03-15 16:12:27 nclbrdb systemd[1]: postgresql-15.service: Main process exited, code=exited, status=1/FAILURE
+░░ Subject: Unit process exited
+
+Memory full at /tmp Location
+
+3. If in log , we can notice some error regarding wal setting then make the same max_wal_senders/max_replication_slots of both DB sides(10/10)
+
+
+
+
+------------------------------
+--------------------Create & Grant----------------------
+sudo mkdir -p /nclbrdb/mnt/appln/data
+sudo chown -R postgres:postgres /nclbrdb/mnt/appln/data
+sudo chmod 700 /nclbrdb/mnt/appln/data
+--------------------------------------------------------
+sudo systemctl stop postgresql-15
+ 
+--------------------Copy--------------------------------
+sudo rsync -av /var/lib/pgsql/15/data/ /mnt/new_pgdata/
+or 
+sudo cp -a /var/lib/pgsql/15/data/* /mnt/new_pgdata/
+ 
+sudo rm -rf /var/lib/pgsql/15/data
+----------------------------------------------
+ 
+-----------------------Define----------------------------------------
+sudo vi /usr/lib/systemd/system/postgresql-15.service
+ 
+Environment=PGDATA=/mnt/new_pgdata
+ 
+ExecStart=/usr/pgsql-15/bin/postgres -D /mnt/new_pgdata
+ 
+ExecStartPre=/usr/pgsql-15/bin/postgresql-15-check-db-dir /nclbrdb/mnt/appln/data
+ 
+
+---------------------------------------------------------------
+sudo systemctl daemon-reload
+sudo systemctl start postgresql-15
+sudo systemctl status postgresql-15
+ 
+-----------------------------
+sudo -i -u postgres
+psql -c "SHOW data_directory;"
+sudo setenforce 0
